@@ -26,6 +26,16 @@ on post-fs-data
 
     setprop vold.post_fs_data_done 1
 
+    # Touch HAL sysfs perms must be set before class_start hal so the
+    # vendor.lineage.touch service's KeyDisabler::isSupported() can open
+    # the sysfs node for write at startup. Without this, IKeyDisabler is
+    # never registered and system_server blocks indefinitely on
+    # HwBinder.getService(IKeyDisabler) until watchdog kills it.
+    chown system radio /sys/class/sec/sec_touchkey/touchkey_enabled
+    chmod 0664 /sys/class/sec/sec_touchkey/touchkey_enabled
+    chown system radio /sys/class/sec/sec_epen/epen_gestures
+    chmod 0664 /sys/class/sec/sec_epen/epen_gestures
+
     # Permissions for bluetooth
     setprop ro.bt.bdaddr_path "/efs/bluetooth/bt_addr"
     chown bluetooth ro.bt.bdaddr_path
